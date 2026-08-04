@@ -2,9 +2,6 @@ name: Build SDK 36 ARM64 tools
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - '.github/workflows/build-arm64-sdk36-tools.yml'
 
 permissions:
   contents: write
