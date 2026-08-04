@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#f7e7c6"/><stop offset="1" stop-color="#e2b98e"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#32664d"/><stop offset="1" stop-color="#153b38"/>
+    </linearGradient>
+    <filter id="shadow"><feGaussianBlur stdDeviation="18"/></filter>
+  </defs>
+  <rect width="1200" height="1500" fill="url(#paper)"/>
+  <circle cx="960" cy="210" r="260" fill="#d57f5c" opacity=".22"/>
+  <circle cx="170" cy="1270" r="330" fill="#7a9b75" opacity=".16"/>
+  <path d="M150 1230 Q580 1040 1060 1180" fill="none" stroke="#765444" stroke-width="4" opacity=".4"/>
+  <path d="M190 1270 Q600 1100 1030 1240" fill="none" stroke="#765444" stroke-width="2" opacity=".35"/>
+  <ellipse cx="610" cy="1250" rx="260" ry="65" fill="#624b42" opacity=".18" filter="url(#shadow)"/>
+  <g stroke="#21493d" stroke-width="16" stroke-linecap="round" fill="none">
+    <path d="M600 1260 Q560 990 590 760"/><path d="M590 1040 Q420 910 340 720"/><path d="M584 950 Q790 820 865 610"/>
+    <path d="M585 850 Q470 690 500 470"/><path d="M675 930 Q830 790 1020 760"/>
+  </g>
+  <g fill="url(#leaf)" stroke="#21493d" stroke-width="7">
+    <path d="M575 1010 C420 1020 300 920 320 790 C455 790 550 865 575 1010Z"/>
+    <path d="M590 900 C430 850 370 730 410 610 C525 650 590 760 590 900Z"/>
+    <path d="M604 820 C500 690 520 540 615 455 C680 590 660 710 604 820Z"/>
+    <path d="M615 1040 C760 1000 860 885 850 770 C720 770 640 865 615 1040Z"/>
+    <path d="M650 920 C780 820 920 830 1015 910 C900 1000 770 990 650 920Z"/>
+    <path d="M620 750 C690 600 825 540 950 575 C890 710 760 770 620 750Z"/>
+    <path d="M530 1120 C390 1110 290 1035 270 930 C400 910 520 990 530 1120Z"/>
+  </g>
+  <g fill="#d27c58" stroke="#934f43" stroke-width="6">
+    <path d="M590 475 C530 390 550 290 630 245 C690 330 670 420 590 475Z"/>
+    <path d="M625 480 C670 370 760 330 850 375 C800 470 715 510 625 480Z"/>
+    <path d="M590 500 C480 470 425 400 440 315 C540 320 610 390 590 500Z"/>
+  </g>
+  <circle cx="620" cy="470" r="26" fill="#f0c56e"/>
+  <g fill="#21493d" opacity=".55">
+    <circle cx="125" cy="155" r="9"/><circle cx="180" cy="155" r="9"/><circle cx="235" cy="155" r="9"/>
+  </g>
+  <text x="600" y="115" text-anchor="middle" fill="#173d39" font-family="serif" font-size="58" letter-spacing="14">GROW WILD</text>
+  <text x="600" y="1385" text-anchor="middle" fill="#173d39" font-family="sans-serif" font-size="22" letter-spacing="7">A QUIET PLACE TO BEGIN</text>
+  <rect x="95" y="90" width="1010" height="1320" fill="none" stroke="#173d39" stroke-width="3" opacity=".55"/>
+</svg>

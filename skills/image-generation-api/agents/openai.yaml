@@ -1,0 +1,4 @@
+interface:
+  display_name: "Image Generation API"
+  short_description: "通过独立 OpenAI 兼容接口生成并保存图片"
+  default_prompt: "使用 image-generation-api 技能调用配置的生图模型生成图片，并将结果保存到指定路径。"

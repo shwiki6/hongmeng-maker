@@ -1,0 +1,11 @@
+# 数据目录：禁止任何 Web 直接访问（数据库与管理员凭据均在此）
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>
+
+# 即便上游放行，也不要把此目录内的文件当脚本执行
+php_flag engine off

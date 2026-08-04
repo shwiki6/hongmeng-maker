@@ -1,0 +1,16 @@
+# Secrets and signing material
+**/.env
+**/.env.*
+**/*.jks
+**/*.keystore
+**/*.key
+**/*.pem
+
+# Build and local tool output
+**/build/
+**/out/
+**/node_modules/
+*.log
+
+# Temporary archives from interrupted downloads
+/tmp/

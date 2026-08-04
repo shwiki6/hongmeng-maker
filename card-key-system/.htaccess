@@ -1,0 +1,21 @@
+# 卡密系统根目录访问保护
+# 1) 拒绝直接访问 db / json 等敏感扩展名（纵深防御，主保护在 data/.htaccess）
+<FilesMatch "\.(db|db-wal|db-shm|sqlite|json|tmp|log)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# 2) 禁止列目录
+Options -Indexes
+
+# 3) 若使用 Apache + PHP-FPM/mod_php，引导所有请求到前端入口（按需启用）
+#    （php -S 与 nginx 模式下无需此项，见 README/API.md）
+# DirectoryIndex index.html
+# RewriteEngine On
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteRule ^ index.html [L]

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="420" viewBox="0 0 900 420">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#17251f"/><stop offset="1" stop-color="#304f3a"/></linearGradient>
+    <linearGradient id="lime" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d9ff67"/><stop offset="1" stop-color="#8fc64b"/></linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#07110c" flood-opacity=".32"/></filter>
+  </defs>
+  <rect width="900" height="420" rx="32" fill="url(#bg)"/>
+  <circle cx="760" cy="76" r="130" fill="#b9ef63" opacity=".12"/>
+  <circle cx="830" cy="340" r="220" fill="none" stroke="#b9ef63" stroke-opacity=".16"/>
+  <path d="M630 420C665 290 754 250 900 218" fill="none" stroke="#c8ff65" stroke-opacity=".28" stroke-width="2"/>
+  <g fill="#d9ff67" opacity=".8"><circle cx="690" cy="86" r="3"/><circle cx="720" cy="115" r="2"/><circle cx="775" cy="48" r="2"/><circle cx="820" cy="150" r="3"/></g>
+  <text x="68" y="94" fill="#cfff6d" font-family="Arial, sans-serif" font-size="15" letter-spacing="4">CARD KEY SYSTEM / 2025</text>
+  <text x="68" y="170" fill="#f4f8ee" font-family="Arial, sans-serif" font-weight="700" font-size="48">让每一张卡密</text>
+  <text x="68" y="226" fill="#f4f8ee" font-family="Arial, sans-serif" font-weight="700" font-size="48">都被妥善管理。</text>
+  <text x="70" y="274" fill="#b9cdb8" font-family="Arial, sans-serif" font-size="17">生成 · 发放 · 验证 · 核销 · 复盘</text>
+  <g transform="translate(590 128) rotate(8)" filter="url(#shadow)">
+    <rect width="190" height="125" rx="18" fill="#f4f8ee"/>
+    <rect x="20" y="22" width="62" height="8" rx="4" fill="#263b2e" opacity=".35"/>
+    <rect x="20" y="44" width="125" height="10" rx="5" fill="#263b2e" opacity=".88"/>
+    <rect x="20" y="67" width="92" height="7" rx="3.5" fill="#263b2e" opacity=".23"/>
+    <rect x="20" y="92" width="66" height="12" rx="6" fill="url(#lime)"/>
+    <circle cx="157" cy="87" r="15" fill="#d9ff67" opacity=".55"/>
+  </g>
+  <text x="68" y="370" fill="#8da991" font-family="monospace" font-size="12" letter-spacing="2">A QUIET CONTROL ROOM FOR DIGITAL ACCESS</text>
+</svg>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#071b31"/>
+      <stop offset=".52" stop-color="#174d62"/>
+      <stop offset="1" stop-color="#db633b"/>
+    </linearGradient>
+    <linearGradient id="aurora" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#baff3d" stop-opacity="0"/>
+      <stop offset=".48" stop-color="#baff3d"/>
+      <stop offset="1" stop-color="#ffd36b" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="55"/></filter>
+  </defs>
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <circle cx="1260" cy="180" r="270" fill="#efff93" opacity=".34" filter="url(#glow)"/>
+  <circle cx="360" cy="790" r="280" fill="#4dd7c5" opacity=".25" filter="url(#glow)"/>
+  <path d="M-90 680 C240 430 390 950 720 690 S1210 380 1690 720" fill="none" stroke="url(#aurora)" stroke-width="42" opacity=".82"/>
+  <g fill="#fff9e8">
+    <circle cx="180" cy="190" r="4"/><circle cx="370" cy="300" r="3"/>
+    <circle cx="760" cy="130" r="5"/><circle cx="1100" cy="360" r="3"/>
+    <circle cx="1460" cy="440" r="5"/><circle cx="1360" cy="710" r="3"/>
+    <circle cx="620" cy="820" r="4"/>
+  </g>
+  <path d="M0 850 L300 650 L500 790 L760 500 L1040 760 L1280 570 L1600 820 V1000 H0Z" fill="#071b31" opacity=".9"/>
+  <path d="M0 900 L420 760 L700 900 L1000 720 L1300 880 L1600 730 V1000 H0Z" fill="#041321"/>
+  <rect x="95" y="90" width="1410" height="820" rx="8" fill="none" stroke="#fff9e8" stroke-opacity=".4"/>
+  <text x="125" y="170" fill="#fff9e8" font-family="monospace" font-size="24" letter-spacing="7">AURORA / 2026</text>
+  <text x="125" y="510" fill="#fff9e8" font-family="sans-serif" font-size="164" font-weight="800" letter-spacing="-8">MAKE SPACE</text>
+  <text x="125" y="640" fill="#fff9e8" font-family="sans-serif" font-size="164" font-weight="800" letter-spacing="-8">FOR WONDER.</text>
+  <text x="130" y="835" fill="#fff9e8" font-family="monospace" font-size="22" letter-spacing="3">A SMALL SVG POSTER, RENDERED AS A JPEG</text>
+</svg>
