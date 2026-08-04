@@ -73,7 +73,9 @@ jobs:
           sed -i '/ACONFIGURATION_COLOR_MODE = 0x10000,/a\    ACONFIGURATION_GRAMMATICAL_GENDER = 0x20000,\n    ACONFIGURATION_GRAMMATICAL_GENDER_ANY = 0,\n    ACONFIGURATION_GRAMMATICAL_GENDER_NEUTER = 1,\n    ACONFIGURATION_GRAMMATICAL_GENDER_FEMININE = 2,\n    ACONFIGURATION_GRAMMATICAL_GENDER_MASCULINE = 3,' \
             third_party/androidfw/include/android/configuration.h
           sed -i '/#include "androidfw\/ApkParsing.h"/a#include <cstring>' third_party/androidfw/ApkParsing.cpp
-          CC=clang CXX='clang++ -stdlib=libstdc++' ./build.sh
+          # AOSP's Android build implicitly exposes C string functions through
+          # transitive headers; make that dependency explicit for glibc/Clang.
+          CC=clang CXX='clang++ -stdlib=libstdc++ -include cstring' ./build.sh
           file build/aapt2
           ldd build/aapt2
           ./build/aapt2 version
