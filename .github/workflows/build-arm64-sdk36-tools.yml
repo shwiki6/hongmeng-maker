@@ -29,7 +29,9 @@ jobs:
             clang cmake ninja-build git curl unzip zip file \
             protobuf-compiler libprotobuf-dev libpng-dev libexpat1-dev \
             zlib1g-dev libc6-dev linux-libc-dev gcc g++ libstdc++-13-dev \
-            libfmt-dev liblz4-dev libzstd-dev zipalign
+            libfmt-dev liblz4-dev libzstd-dev \
+            android-libbase-dev android-libcutils-dev android-liblog-dev \
+            android-libutils-dev android-libziparchive-dev zipalign
 
       - name: Download SDK 36 inputs
         run: |
@@ -57,6 +59,10 @@ jobs:
           # The upstream project targets Android/Termux by default. Build for the
           # native Ubuntu ARM64 host and remove the Android-only TLS compiler flag.
           sed -i '/CMAKE_C_COMPILER_TARGET/d; /CMAKE_CXX_COMPILER_TARGET/d; /-femulated-tls/d' cmake/CompilerFlags.cmake
+          # Use distro Android framework headers when available.
+          test -f /usr/include/android/configuration.h || \
+            test -f /usr/include/androidfw/ResourceTypes.h || \
+            { echo 'Android framework development headers are unavailable'; exit 1; }
           CC=clang CXX='clang++ -stdlib=libstdc++' ./build.sh
           file build/aapt2
           ldd build/aapt2
