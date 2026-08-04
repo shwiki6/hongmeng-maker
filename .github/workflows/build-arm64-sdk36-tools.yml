@@ -28,8 +28,8 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             clang cmake ninja-build git curl unzip zip file \
             protobuf-compiler libprotobuf-dev libpng-dev libexpat1-dev \
-            zlib1g-dev libc6-dev linux-libc-dev libfmt-dev liblz4-dev \
-            libzstd-dev zipalign
+            zlib1g-dev libc6-dev linux-libc-dev gcc g++ libstdc++-13-dev \
+            libfmt-dev liblz4-dev libzstd-dev zipalign
 
       - name: Download SDK 36 inputs
         run: |
@@ -54,7 +54,7 @@ jobs:
           sed -i '1c#!/usr/bin/env bash' build.sh
           # Avoid CMake's broken Clang pthread probe on this ARM64 runner.
           sed -i 's/find_package(Threads REQUIRED)/add_library(Threads::Threads INTERFACE IMPORTED)\nset_target_properties(Threads::Threads PROPERTIES INTERFACE_LINK_LIBRARIES "-pthread")/' cmake/Dependencies.cmake
-          CC=clang CXX=clang++ ./build.sh
+          CC=clang CXX='clang++ -stdlib=libstdc++' ./build.sh
           file build/aapt2
           ldd build/aapt2
           ./build/aapt2 version
