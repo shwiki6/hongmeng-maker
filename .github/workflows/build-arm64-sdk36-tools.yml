@@ -28,7 +28,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             clang cmake ninja-build git curl unzip zip file \
             protobuf-compiler libprotobuf-dev libpng-dev libexpat1-dev \
-            zlib1g-dev libfmt-dev liblz4-dev libzstd-dev
+            zlib1g-dev libfmt-dev liblz4-dev libzstd-dev zipalign
 
       - name: Download SDK 36 inputs
         run: |
@@ -51,7 +51,7 @@ jobs:
           cd aapt2-src
           # The upstream script has a Termux-only shebang; its CMake build is portable.
           sed -i '1c#!/usr/bin/env bash' build.sh
-          ./build.sh
+          CC=clang CXX=clang++ ./build.sh
           file build/aapt2
           ldd build/aapt2
           ./build/aapt2 version
@@ -81,16 +81,16 @@ jobs:
         run: |
           set -eux
           mkdir -p package/sdk36
+          cp /usr/bin/zipalign package/sdk36/
           cp "$SDK_ROOT/build-tools/36.0.0/apksigner" package/sdk36/
           cp "$SDK_ROOT/build-tools/36.0.0/lib/apksigner.jar" package/sdk36/ 2>/dev/null || true
-          cp "$SDK_ROOT/build-tools/36.0.0/zipalign" package/sdk36/
-          cp "$SDK_ROOT/platform-tools/adb" package/sdk36/ 2>/dev/null || true
           cp "$GITHUB_WORKSPACE/package/aapt2" package/sdk36/
           curl -fL --retry 5 --retry-all-errors \
             -o package/sdk36/apktool.jar \
             "https://github.com/iBotPeaches/Apktool/releases/download/v${APKTOOL_VERSION}/apktool_${APKTOOL_VERSION}.jar"
           printf '%s\n' 'SDK 36 ARM64 Ubuntu tool bundle' > package/sdk36/README.txt
           file package/sdk36/*
+          file package/sdk36/aapt2 package/sdk36/zipalign | grep -E 'ARM aarch64|ARM64'
           zip -q -r sdk36-arm64-ubuntu-tools.zip package/sdk36
           sha256sum sdk36-arm64-ubuntu-tools.zip > sdk36-arm64-ubuntu-tools.zip.sha256
 
