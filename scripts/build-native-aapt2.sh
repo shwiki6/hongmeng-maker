@@ -19,6 +19,7 @@ cp -a /tmp/android-headers/native/usr/include/android/android third_party/androi
 sed -i '/ACONFIGURATION_COLOR_MODE = 0x10000,/a\    ACONFIGURATION_GRAMMATICAL_GENDER = 0x20000,\n    ACONFIGURATION_GRAMMATICAL_GENDER_ANY = 0,\n    ACONFIGURATION_GRAMMATICAL_GENDER_NEUTER = 1,\n    ACONFIGURATION_GRAMMATICAL_GENDER_FEMININE = 2,\n    ACONFIGURATION_GRAMMATICAL_GENDER_MASCULINE = 3,' third_party/androidfw/include/android/configuration.h
 sed -i '/#include "androidfw\/ApkParsing.h"/a#include <cstring>' third_party/androidfw/ApkParsing.cpp
 sed -i '/#include <functional>/a#include <memory>' third_party/aapt2/cmd/Command.h
+sed -i '/#include <optional>/i#include <cstdint>' third_party/aapt2/AppInfo.h
 sed -i '/extern "C" int posix_strerror_r/i#ifndef __BIONIC__\nextern "C" int __xpg_strerror_r(int, char*, size_t);\n#endif' third_party/libbase/posix_strerror_r.cpp
 sed -i 's/return strerror_r(errnum, buf, buflen);/return __xpg_strerror_r(errnum, buf, buflen);/' third_party/libbase/posix_strerror_r.cpp
 sed -i -e 's/^constexpr inline uint32_t packLocale/inline uint32_t packLocale/' \
