@@ -22,7 +22,13 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends clang cmake ninja-build git curl unzip zip file zipalign
+          sudo apt-get install -y --no-install-recommends \
+            clang cmake ninja-build git curl unzip zip file zipalign \
+            protobuf-compiler libprotobuf-dev libpng-dev libexpat1-dev \
+            zlib1g-dev libc6-dev linux-libc-dev gcc g++ libstdc++-13-dev \
+            libfmt-dev liblz4-dev libzstd-dev \
+            android-libbase-dev android-libcutils-dev android-liblog-dev \
+            android-libutils-dev android-libziparchive-dev
       - name: Download SDK 36 inputs
         run: |
           mkdir -p "$SDK_ROOT"
