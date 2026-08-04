@@ -8,6 +8,12 @@ sed -i '1c#!/usr/bin/env bash' build.sh
 sed -i 's/find_package(Threads REQUIRED)/if(NOT TARGET Threads::Threads)\n  add_library(Threads::Threads INTERFACE IMPORTED)\nendif()\nset_target_properties(Threads::Threads PROPERTIES INTERFACE_LINK_LIBRARIES "-pthread")/' cmake/Dependencies.cmake
 sed -i '/CMAKE_C_COMPILER_TARGET/d; /CMAKE_CXX_COMPILER_TARGET/d; /-femulated-tls/d' cmake/CompilerFlags.cmake
 
+# Ubuntu's android-liblog-dev package may ship only a versioned liblog file,
+# while this standalone CMake project links the conventional -llog name.
+log_lib=$(find /usr/lib /lib -name 'liblog.so*' -type f -o -name 'liblog.so*' -type l | head -n1)
+test -n "$log_lib"
+sudo ln -sf "$log_lib" /usr/lib/aarch64-linux-gnu/liblog.so
+
 mkdir -p /tmp/android-headers third_party/androidfw/include
 curl -fL --retry 5 --retry-all-errors \
   -o /tmp/android-headers/native.deb \
