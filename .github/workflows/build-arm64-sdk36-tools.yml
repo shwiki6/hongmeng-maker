@@ -1,6 +1,8 @@
 name: Build SDK 36 ARM64 tools
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
