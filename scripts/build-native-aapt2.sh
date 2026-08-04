@@ -24,8 +24,8 @@ sed -i -e 's/^constexpr inline uint32_t packLocale/inline uint32_t packLocale/' 
   -e 's/^constexpr inline uint32_t packScript/inline uint32_t packScript/' \
   third_party/androidfw/include/androidfw/LocaleDataLookup.h
 sed -i '/const const_iterator operator++(int)/i\
-        const_iterator& operator--() { safe_ptr_ += -1; return *this; }\
-        const_iterator operator--(int) { const_iterator temp(*this); safe_ptr_ += -1; return temp; }\
+        const_iterator& operator--() { safe_ptr_ = safe_ptr_ + (-1); return *this; }\
+        const_iterator operator--(int) { const_iterator temp(*this); safe_ptr_ = safe_ptr_ + (-1); return temp; }\
 ' third_party/incfs/util/include/util/map_ptr.h
 
 CC=clang CXX='clang++ -stdlib=libstdc++ -include cstring' ./build.sh
