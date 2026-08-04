@@ -75,6 +75,8 @@ jobs:
           sed -i '/#include "androidfw\/ApkParsing.h"/a#include <cstring>' third_party/androidfw/ApkParsing.cpp
           # glibc exposes the POSIX strerror_r entry point under this symbol;
           # Bionic and glibc otherwise select different overloads.
+          sed -i '/extern "C" int posix_strerror_r/i#ifndef __BIONIC__\nextern "C" int __xpg_strerror_r(int, char*, size_t);\n#endif' \
+            third_party/libbase/posix_strerror_r.cpp
           sed -i 's/return strerror_r(errnum, buf, buflen);/return __xpg_strerror_r(errnum, buf, buflen);/' \
             third_party/libbase/posix_strerror_r.cpp
           # AOSP's Android build implicitly exposes C string functions through
