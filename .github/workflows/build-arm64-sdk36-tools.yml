@@ -28,7 +28,8 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             clang cmake ninja-build git curl unzip zip file \
             protobuf-compiler libprotobuf-dev libpng-dev libexpat1-dev \
-            zlib1g-dev libfmt-dev liblz4-dev libzstd-dev zipalign
+            zlib1g-dev libc6-dev linux-libc-dev libfmt-dev liblz4-dev \
+            libzstd-dev zipalign
 
       - name: Download SDK 36 inputs
         run: |
@@ -51,6 +52,8 @@ jobs:
           cd aapt2-src
           # The upstream script has a Termux-only shebang; its CMake build is portable.
           sed -i '1c#!/usr/bin/env bash' build.sh
+          # Use glibc's integrated pthread implementation on Ubuntu ARM64.
+          sed -i 's/find_package(Threads REQUIRED)/set(THREADS_PREFER_PTHREAD_FLAG OFF)\nfind_package(Threads REQUIRED)/' cmake/Dependencies.cmake
           CC=clang CXX=clang++ ./build.sh
           file build/aapt2
           ldd build/aapt2
