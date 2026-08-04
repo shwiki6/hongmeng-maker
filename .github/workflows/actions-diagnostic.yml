@@ -1,0 +1,12 @@
+name: Actions diagnostic
+
+on: [push, workflow_dispatch]
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Check ARM64 runner
+        run: |
+          uname -a
+          test "$(uname -m)" = "aarch64"
