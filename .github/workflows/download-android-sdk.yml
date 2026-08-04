@@ -1,0 +1,40 @@
+name: Download Latest Android SDK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sdk:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download Android command-line tools
+        run: |
+          curl -fL --retry 5 --retry-delay 5 \
+            -o commandlinetools.zip \
+            https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip
+
+      - name: Install SDK packages
+        run: |
+          mkdir -p "$RUNNER_TEMP/android-sdk/cmdline-tools"
+          unzip -q commandlinetools.zip -d "$RUNNER_TEMP/android-sdk/cmdline-tools"
+          mv "$RUNNER_TEMP/android-sdk/cmdline-tools/cmdline-tools" \
+             "$RUNNER_TEMP/android-sdk/cmdline-tools/latest"
+          export ANDROID_HOME="$RUNNER_TEMP/android-sdk"
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Package SDK
+        run: |
+          cd "$RUNNER_TEMP"
+          tar -czf android-sdk-linux-arm64.tar.gz android-sdk
+
+      - name: Upload SDK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-sdk-linux
+          path: ${{ runner.temp }}/android-sdk-linux-arm64.tar.gz
+          retention-days: 7
