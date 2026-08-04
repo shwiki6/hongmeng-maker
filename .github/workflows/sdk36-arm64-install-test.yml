@@ -51,3 +51,26 @@ jobs:
           export LD_LIBRARY_PATH="$(dirname "$(find /usr/lib /lib -name 'liblog.so.0*' -type f -o -name 'liblog.so.0*' -type l | head -n1)")${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
           "$GITHUB_WORKSPACE/package/aapt2" version
           "$GITHUB_WORKSPACE/package/aapt2" dump badging "$SDK_ROOT/platforms/android-36/android.jar" >/dev/null
+      - name: Package SDK 36 tools
+        run: |
+          set -eux
+          mkdir -p package/sdk36/lib
+          cp /usr/bin/zipalign package/sdk36/
+          cp "$SDK_ROOT/build-tools/36.0.0/apksigner" package/sdk36/
+          cp "$SDK_ROOT/build-tools/36.0.0/lib/apksigner.jar" package/sdk36/ || true
+          cp "$GITHUB_WORKSPACE/package/aapt2" package/sdk36/
+          log_runtime=$(find /usr/lib /lib -name 'liblog.so.0*' -type f -o -name 'liblog.so.0*' -type l | head -n1)
+          cp -L "$log_runtime" package/sdk36/lib/liblog.so.0
+          curl -fL --retry 5 --retry-all-errors -o package/sdk36/apktool.jar \
+            "https://github.com/iBotPeaches/Apktool/releases/download/v${APKTOOL_VERSION}/apktool_${APKTOOL_VERSION}.jar"
+          printf '%s\n' 'SDK 36 ARM64 Ubuntu/glibc tool bundle' > package/sdk36/README.txt
+          printf '%s\n' 'Run aapt2 with: LD_LIBRARY_PATH=./lib ./aapt2' >> package/sdk36/README.txt
+          zip -q -r sdk36-arm64-ubuntu-tools.zip package/sdk36
+          sha256sum sdk36-arm64-ubuntu-tools.zip > sdk36-arm64-ubuntu-tools.zip.sha256
+      - name: Upload SDK 36 bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk36-arm64-ubuntu-tools
+          path: |
+            sdk36-arm64-ubuntu-tools.zip
+            sdk36-arm64-ubuntu-tools.zip.sha256
