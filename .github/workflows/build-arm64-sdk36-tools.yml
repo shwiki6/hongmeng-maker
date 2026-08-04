@@ -79,6 +79,26 @@ jobs:
             third_party/libbase/posix_strerror_r.cpp
           sed -i 's/return strerror_r(errnum, buf, buflen);/return __xpg_strerror_r(errnum, buf, buflen);/' \
             third_party/libbase/posix_strerror_r.cpp
+          # Clang does not accept reinterpret_cast in these constexpr helpers
+          # for the native glibc build; runtime evaluation is sufficient here.
+          sed -i \
+            -e 's/^constexpr inline uint32_t packLocale/inline uint32_t packLocale/' \
+            -e 's/^constexpr inline uint32_t packScript/inline uint32_t packScript/' \
+            third_party/androidfw/include/androidfw/LocaleDataLookup.h
+          # libstdc++ reverse iterators require decrement support from this
+          # random-access iterator, which the Android build does not use.
+          sed -i '/const const_iterator operator++(int)/i\
+        const_iterator& operator--() {\
+            safe_ptr_ += -1;\
+            return *this;\
+        }\
+\
+        const_iterator operator--(int) {\
+            const_iterator temp(*this);\
+            safe_ptr_ += -1;\
+            return temp;\
+        }\
+' third_party/incfs/util/include/util/map_ptr.h
           # AOSP's Android build implicitly exposes C string functions through
           # transitive headers; make that dependency explicit for glibc/Clang.
           CC=clang CXX='clang++ -stdlib=libstdc++ -include cstring' ./build.sh
