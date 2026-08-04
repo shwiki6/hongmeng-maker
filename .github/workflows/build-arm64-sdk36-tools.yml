@@ -56,8 +56,8 @@ jobs:
           # The upstream project targets Android/Termux by default. Build for the
           # native Ubuntu ARM64 host and remove the Android-only TLS compiler flag.
           sed -i '/CMAKE_C_COMPILER_TARGET/d; /CMAKE_CXX_COMPILER_TARGET/d; /-femulated-tls/d' cmake/CompilerFlags.cmake
-          # The standalone source omits AOSP framework headers. Fetch the verified
-          # Ubuntu packages from a mirror and unpack only their header trees.
+          # The standalone source omits this public AOSP header. Fetch the verified
+          # Ubuntu header package, but keep the source-matched androidfw headers.
           mkdir -p /tmp/android-headers third_party/androidfw/include
           curl -fL --retry 5 --retry-all-errors \
             -o /tmp/android-headers/native-headers.deb \
@@ -66,14 +66,6 @@ jobs:
             | sha256sum -c -
           dpkg-deb -x /tmp/android-headers/native-headers.deb /tmp/android-headers/native
           cp -a /tmp/android-headers/native/usr/include/android/android \
-            third_party/androidfw/include/
-          curl -fL --retry 5 --retry-all-errors \
-            -o /tmp/android-headers/androidfw-dev.deb \
-            https://mirrors.aliyun.com/ubuntu-ports/pool/universe/a/android-platform-frameworks-base/android-libandroidfw-dev_14~beta1-2build3_arm64.deb
-          echo '39e74d916198d2f214fc485921c05bf0328771656a8fd8274456da968473ff17  /tmp/android-headers/androidfw-dev.deb' \
-            | sha256sum -c -
-          dpkg-deb -x /tmp/android-headers/androidfw-dev.deb /tmp/android-headers/androidfw-dev
-          cp -a /tmp/android-headers/androidfw-dev/usr/include/android/androidfw \
             third_party/androidfw/include/
           test -s third_party/androidfw/include/android/configuration.h
           sed -i '/#include "androidfw\/ApkParsing.h"/a#include <cstring>' third_party/androidfw/ApkParsing.cpp
