@@ -13,6 +13,9 @@ sed -i '/CMAKE_C_COMPILER_TARGET/d; /CMAKE_CXX_COMPILER_TARGET/d; /-femulated-tl
 log_lib=$(find /usr/lib /lib -name 'liblog.so*' -type f -o -name 'liblog.so*' -type l | head -n1)
 test -n "$log_lib"
 sudo ln -sf "$log_lib" /usr/lib/aarch64-linux-gnu/liblog.so
+log_runtime=$(find /usr/lib /lib -name 'liblog.so.0*' -type f -o -name 'liblog.so.0*' -type l | head -n1)
+test -n "$log_runtime"
+export LD_LIBRARY_PATH="$(dirname "$log_runtime")${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 mkdir -p /tmp/android-headers third_party/androidfw/include
 curl -fL --retry 5 --retry-all-errors \
