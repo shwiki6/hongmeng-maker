@@ -23,3 +23,17 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends clang cmake ninja-build git curl unzip zip file zipalign
+      - name: Download SDK 36 inputs
+        run: |
+          mkdir -p "$SDK_ROOT"
+          curl -fL --retry 5 --retry-all-errors -o sdk-tools.zip \
+            https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip
+          unzip -q sdk-tools.zip -d "$SDK_ROOT"
+          mkdir -p "$SDK_ROOT/cmdline-tools/latest"
+          mv "$SDK_ROOT/cmdline-tools"/bin "$SDK_ROOT/cmdline-tools"/lib \
+            "$SDK_ROOT/cmdline-tools"/NOTICE.txt "$SDK_ROOT/cmdline-tools"/source.properties \
+            "$SDK_ROOT/cmdline-tools/latest/"
+          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
+            "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+          test -s "$SDK_ROOT/platforms/android-36/android.jar"
