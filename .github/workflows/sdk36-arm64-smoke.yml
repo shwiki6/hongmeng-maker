@@ -1,0 +1,21 @@
+name: SDK 36 ARM64 smoke test
+
+on: [push, workflow_dispatch]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    env:
+      SDK_ROOT: ${{ github.workspace }}/sdk
+      AAPT2_REPO: https://github.com/arriRgb31/aapt2-termux.git
+      APKTOOL_VERSION: 2.11.1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check configuration
+        run: |
+          uname -a
+          printf '%s\n' "$SDK_ROOT" "$AAPT2_REPO" "$APKTOOL_VERSION"
