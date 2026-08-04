@@ -53,7 +53,7 @@ jobs:
           # The upstream script has a Termux-only shebang; its CMake build is portable.
           sed -i '1c#!/usr/bin/env bash' build.sh
           # Avoid CMake's broken Clang pthread probe on this ARM64 runner.
-          sed -i 's/find_package(Threads REQUIRED)/add_library(Threads::Threads INTERFACE IMPORTED)\nset_target_properties(Threads::Threads PROPERTIES INTERFACE_LINK_LIBRARIES "-pthread")/' cmake/Dependencies.cmake
+          sed -i 's/find_package(Threads REQUIRED)/if(NOT TARGET Threads::Threads)\n  add_library(Threads::Threads INTERFACE IMPORTED)\nendif()\nset_target_properties(Threads::Threads PROPERTIES INTERFACE_LINK_LIBRARIES "-pthread")/' cmake/Dependencies.cmake
           # The upstream project targets Android/Termux by default. Build for the
           # native Ubuntu ARM64 host and remove the Android-only TLS compiler flag.
           sed -i '/CMAKE_C_COMPILER_TARGET/d; /CMAKE_CXX_COMPILER_TARGET/d; /-femulated-tls/d' cmake/CompilerFlags.cmake
