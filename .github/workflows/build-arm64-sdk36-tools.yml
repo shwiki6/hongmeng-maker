@@ -59,10 +59,13 @@ jobs:
           # The upstream project targets Android/Termux by default. Build for the
           # native Ubuntu ARM64 host and remove the Android-only TLS compiler flag.
           sed -i '/CMAKE_C_COMPILER_TARGET/d; /CMAKE_CXX_COMPILER_TARGET/d; /-femulated-tls/d' cmake/CompilerFlags.cmake
-          # Use distro Android framework headers when available.
-          test -f /usr/include/android/configuration.h || \
-            test -f /usr/include/androidfw/ResourceTypes.h || \
-            { echo 'Android framework development headers are unavailable'; exit 1; }
+          # The standalone Termux source omits this AOSP public framework header.
+          # Fetch it from a GitHub AOSP mirror, never from Google's download host.
+          mkdir -p third_party/androidfw/include/android
+          curl -fL --retry 5 --retry-all-errors \
+            -o third_party/androidfw/include/android/configuration.h \
+            https://raw.githubusercontent.com/LineageOS/android_frameworks_base/lineage-21.0/libs/androidfw/include/android/configuration.h
+          sed -i '2i#include <cstring>' third_party/androidfw/ApkParsing.cpp
           CC=clang CXX='clang++ -stdlib=libstdc++' ./build.sh
           file build/aapt2
           ldd build/aapt2
