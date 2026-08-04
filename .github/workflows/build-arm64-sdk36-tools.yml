@@ -61,13 +61,17 @@ jobs:
           mkdir -p /tmp/android-headers third_party/androidfw/include
           curl -fL --retry 5 --retry-all-errors \
             -o /tmp/android-headers/native-headers.deb \
-            https://mirrors.aliyun.com/ubuntu-ports/pool/universe/a/android-platform-tools/android-platform-frameworks-native-headers_34.0.4-1build3_all.deb
-          echo '92856bbadf2ceb57894fdeeebb787dfef4af80560a0f18a47ad33910935f5f34  /tmp/android-headers/native-headers.deb' \
+            https://mirrors.aliyun.com/ubuntu/pool/universe/a/android-platform-tools/android-platform-frameworks-native-headers_34.0.5-12_all.deb
+          echo '1636567f75417966cc2b9a3b3bacc962b5240fbc95ec9a914d3f65558651d307  /tmp/android-headers/native-headers.deb' \
             | sha256sum -c -
           dpkg-deb -x /tmp/android-headers/native-headers.deb /tmp/android-headers/native
           cp -a /tmp/android-headers/native/usr/include/android/android \
             third_party/androidfw/include/
           test -s third_party/androidfw/include/android/configuration.h
+          # Ubuntu's header package predates the Android 14 grammatical-gender
+          # constants used by this AAPT2 source. Add the stable ABI definitions.
+          sed -i '/ACONFIGURATION_COLOR_MODE = 0x10000,/a\    ACONFIGURATION_GRAMMATICAL_GENDER = 0x20000,\n    ACONFIGURATION_GRAMMATICAL_GENDER_ANY = 0,\n    ACONFIGURATION_GRAMMATICAL_GENDER_NEUTER = 1,\n    ACONFIGURATION_GRAMMATICAL_GENDER_FEMININE = 2,\n    ACONFIGURATION_GRAMMATICAL_GENDER_MASCULINE = 3,' \
+            third_party/androidfw/include/android/configuration.h
           sed -i '/#include "androidfw\/ApkParsing.h"/a#include <cstring>' third_party/androidfw/ApkParsing.cpp
           CC=clang CXX='clang++ -stdlib=libstdc++' ./build.sh
           file build/aapt2
