@@ -1,0 +1,164 @@
+name: SDK 36 ARM64 native build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    # This is a glibc Ubuntu ARM64 runner, not an Android/Termux runner.
+    runs-on: ubuntu-24.04-arm
+    env:
+      SDK_ROOT: ${{ github.workspace }}/sdk
+      AAPT2_REPO: https://github.com/arriRgb31/aapt2-termux.git
+      APKTOOL_VERSION: 2.11.1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ARM64 build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            clang cmake ninja-build git curl unzip zip file \
+            protobuf-compiler libprotobuf-dev libpng-dev libexpat1-dev \
+            zlib1g-dev libc6-dev linux-libc-dev gcc g++ libstdc++-13-dev \
+            libfmt-dev liblz4-dev libzstd-dev \
+            android-libbase-dev android-libcutils-dev android-liblog-dev \
+            android-libutils-dev android-libziparchive-dev zipalign
+
+      - name: Download SDK 36 inputs
+        run: |
+          mkdir -p "$SDK_ROOT"
+          curl -fL --retry 5 --retry-all-errors \
+            -o sdk-tools.zip \
+            https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip
+          unzip -q sdk-tools.zip -d "$SDK_ROOT"
+          mkdir -p "$SDK_ROOT/cmdline-tools/latest"
+          mv "$SDK_ROOT/cmdline-tools"/bin "$SDK_ROOT/cmdline-tools"/lib \
+             "$SDK_ROOT/cmdline-tools"/NOTICE.txt "$SDK_ROOT/cmdline-tools"/source.properties \
+             "$SDK_ROOT/cmdline-tools/latest/"
+          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" \
+            "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Build AAPT2 for Ubuntu ARM64
+        run: |
+          git clone --depth 1 "$AAPT2_REPO" aapt2-src
+          cd aapt2-src
+          # The upstream script has a Termux-only shebang; its CMake build is portable.
+          sed -i '1c#!/usr/bin/env bash' build.sh
+          # Avoid CMake's broken Clang pthread probe on this ARM64 runner.
+          sed -i 's/find_package(Threads REQUIRED)/if(NOT TARGET Threads::Threads)\n  add_library(Threads::Threads INTERFACE IMPORTED)\nendif()\nset_target_properties(Threads::Threads PROPERTIES INTERFACE_LINK_LIBRARIES "-pthread")/' cmake/Dependencies.cmake
+          # The upstream project targets Android/Termux by default. Build for the
+          # native Ubuntu ARM64 host and remove the Android-only TLS compiler flag.
+          sed -i '/CMAKE_C_COMPILER_TARGET/d; /CMAKE_CXX_COMPILER_TARGET/d; /-femulated-tls/d' cmake/CompilerFlags.cmake
+          # The standalone source omits this public AOSP header. Fetch the verified
+          # Ubuntu header package, but keep the source-matched androidfw headers.
+          mkdir -p /tmp/android-headers third_party/androidfw/include
+          curl -fL --retry 5 --retry-all-errors \
+            -o /tmp/android-headers/native-headers.deb \
+            https://mirrors.aliyun.com/ubuntu/pool/universe/a/android-platform-tools/android-platform-frameworks-native-headers_34.0.5-12_all.deb
+          echo '1636567f75417966cc2b9a3b3bacc962b5240fbc95ec9a914d3f65558651d307  /tmp/android-headers/native-headers.deb' \
+            | sha256sum -c -
+          dpkg-deb -x /tmp/android-headers/native-headers.deb /tmp/android-headers/native
+          cp -a /tmp/android-headers/native/usr/include/android/android \
+            third_party/androidfw/include/
+          test -s third_party/androidfw/include/android/configuration.h
+          # Ubuntu's header package predates the Android 14 grammatical-gender
+          # constants used by this AAPT2 source. Add the stable ABI definitions.
+          sed -i '/ACONFIGURATION_COLOR_MODE = 0x10000,/a\    ACONFIGURATION_GRAMMATICAL_GENDER = 0x20000,\n    ACONFIGURATION_GRAMMATICAL_GENDER_ANY = 0,\n    ACONFIGURATION_GRAMMATICAL_GENDER_NEUTER = 1,\n    ACONFIGURATION_GRAMMATICAL_GENDER_FEMININE = 2,\n    ACONFIGURATION_GRAMMATICAL_GENDER_MASCULINE = 3,' \
+            third_party/androidfw/include/android/configuration.h
+          sed -i '/#include "androidfw\/ApkParsing.h"/a#include <cstring>' third_party/androidfw/ApkParsing.cpp
+          # glibc exposes the POSIX strerror_r entry point under this symbol;
+          # Bionic and glibc otherwise select different overloads.
+          sed -i '/extern "C" int posix_strerror_r/i#ifndef __BIONIC__\nextern "C" int __xpg_strerror_r(int, char*, size_t);\n#endif' \
+            third_party/libbase/posix_strerror_r.cpp
+          sed -i 's/return strerror_r(errnum, buf, buflen);/return __xpg_strerror_r(errnum, buf, buflen);/' \
+            third_party/libbase/posix_strerror_r.cpp
+          # Clang does not accept reinterpret_cast in these constexpr helpers
+          # for the native glibc build; runtime evaluation is sufficient here.
+          sed -i \
+            -e 's/^constexpr inline uint32_t packLocale/inline uint32_t packLocale/' \
+            -e 's/^constexpr inline uint32_t packScript/inline uint32_t packScript/' \
+            third_party/androidfw/include/androidfw/LocaleDataLookup.h
+          # libstdc++ reverse iterators require decrement support from this
+          # random-access iterator, which the Android build does not use.
+          sed -i '/const const_iterator operator++(int)/i\
+        const_iterator& operator--() {\
+            safe_ptr_ += -1;\
+            return *this;\
+        }\
+\
+        const_iterator operator--(int) {\
+            const_iterator temp(*this);\
+            safe_ptr_ += -1;\
+            return temp;\
+        }\
+' third_party/incfs/util/include/util/map_ptr.h
+          # AOSP's Android build implicitly exposes C string functions through
+          # transitive headers; make that dependency explicit for glibc/Clang.
+          CC=clang CXX='clang++ -stdlib=libstdc++ -include cstring' ./build.sh
+          file build/aapt2
+          ldd build/aapt2
+          ./build/aapt2 version
+          install -Dm755 build/aapt2 "$GITHUB_WORKSPACE/package/aapt2"
+
+      - name: Verify AAPT2 with SDK 36 resources
+        run: |
+          set -eux
+          AAPT2="$GITHUB_WORKSPACE/package/aapt2"
+          PLATFORM="$SDK_ROOT/platforms/android-36/android.jar"
+          "$AAPT2" version
+          "$AAPT2" dump badging "$PLATFORM" >/dev/null
+          mkdir -p verify/res/values verify/out
+          cat > verify/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.sdk36test">
+              <application android:theme="@style/AppTheme" android:label="SDK36 test" />
+          </manifest>
+          EOF
+          cat > verify/res/values/styles.xml <<'EOF'
+          <resources><style name="AppTheme" parent="android:style/Theme.Material.Light" /></resources>
+          EOF
+          "$AAPT2" compile --dir verify/res -o verify/out/res.zip
+          "$AAPT2" link --proto-format -o verify/out/resources.pb \
+            -I "$PLATFORM" --manifest verify/AndroidManifest.xml verify/out/res.zip
+
+      - name: Assemble ARM64 SDK 36 tool bundle
+        run: |
+          set -eux
+          mkdir -p package/sdk36
+          cp /usr/bin/zipalign package/sdk36/
+          cp "$SDK_ROOT/build-tools/36.0.0/apksigner" package/sdk36/
+          cp "$SDK_ROOT/build-tools/36.0.0/lib/apksigner.jar" package/sdk36/ 2>/dev/null || true
+          cp "$GITHUB_WORKSPACE/package/aapt2" package/sdk36/
+          curl -fL --retry 5 --retry-all-errors \
+            -o package/sdk36/apktool.jar \
+            "https://github.com/iBotPeaches/Apktool/releases/download/v${APKTOOL_VERSION}/apktool_${APKTOOL_VERSION}.jar"
+          printf '%s\n' 'SDK 36 ARM64 Ubuntu tool bundle' > package/sdk36/README.txt
+          file package/sdk36/*
+          file package/sdk36/aapt2 package/sdk36/zipalign | grep -E 'ARM aarch64|ARM64'
+          zip -q -r sdk36-arm64-ubuntu-tools.zip package/sdk36
+          sha256sum sdk36-arm64-ubuntu-tools.zip > sdk36-arm64-ubuntu-tools.zip.sha256
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk36-arm64-ubuntu-tools
+          path: |
+            sdk36-arm64-ubuntu-tools.zip
+            sdk36-arm64-ubuntu-tools.zip.sha256
+
+      - name: Publish GitHub release asset
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: sdk36-arm64-ubuntu-${{ github.run_number }}
+          name: SDK 36 ARM64 Ubuntu tools ${{ github.run_number }}
+          generate_release_notes: true
+          files: |
+            sdk36-arm64-ubuntu-tools.zip
+            sdk36-arm64-ubuntu-tools.zip.sha256
