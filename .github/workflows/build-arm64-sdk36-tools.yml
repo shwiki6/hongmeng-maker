@@ -52,8 +52,8 @@ jobs:
           cd aapt2-src
           # The upstream script has a Termux-only shebang; its CMake build is portable.
           sed -i '1c#!/usr/bin/env bash' build.sh
-          # Use glibc's integrated pthread implementation on Ubuntu ARM64.
-          sed -i 's/find_package(Threads REQUIRED)/set(THREADS_PREFER_PTHREAD_FLAG OFF)\nfind_package(Threads REQUIRED)/' cmake/Dependencies.cmake
+          # Avoid CMake's broken Clang pthread probe on this ARM64 runner.
+          sed -i 's/find_package(Threads REQUIRED)/add_library(Threads::Threads INTERFACE IMPORTED)\nset_target_properties(Threads::Threads PROPERTIES INTERFACE_LINK_LIBRARIES "-pthread")/' cmake/Dependencies.cmake
           CC=clang CXX=clang++ ./build.sh
           file build/aapt2
           ldd build/aapt2
