@@ -56,13 +56,27 @@ jobs:
           # The upstream project targets Android/Termux by default. Build for the
           # native Ubuntu ARM64 host and remove the Android-only TLS compiler flag.
           sed -i '/CMAKE_C_COMPILER_TARGET/d; /CMAKE_CXX_COMPILER_TARGET/d; /-femulated-tls/d' cmake/CompilerFlags.cmake
-          # The standalone Termux source omits this AOSP public framework header.
-          # Fetch it from a GitHub AOSP mirror, never from Google's download host.
-          mkdir -p third_party/androidfw/include/android
+          # The standalone source omits AOSP framework headers. Fetch the verified
+          # Ubuntu packages from a mirror and unpack only their header trees.
+          mkdir -p /tmp/android-headers third_party/androidfw/include
           curl -fL --retry 5 --retry-all-errors \
-            -o third_party/androidfw/include/android/configuration.h \
-            https://raw.githubusercontent.com/LineageOS/android_frameworks_base/lineage-21.0/libs/androidfw/include/android/configuration.h
-          sed -i '2i#include <cstring>' third_party/androidfw/ApkParsing.cpp
+            -o /tmp/android-headers/native-headers.deb \
+            https://mirrors.aliyun.com/ubuntu-ports/pool/universe/a/android-platform-tools/android-platform-frameworks-native-headers_34.0.4-1build3_all.deb
+          echo '92856bbadf2ceb57894fdeeebb787dfef4af80560a0f18a47ad33910935f5f34  /tmp/android-headers/native-headers.deb' \
+            | sha256sum -c -
+          dpkg-deb -x /tmp/android-headers/native-headers.deb /tmp/android-headers/native
+          cp -a /tmp/android-headers/native/usr/include/android/android \
+            third_party/androidfw/include/
+          curl -fL --retry 5 --retry-all-errors \
+            -o /tmp/android-headers/androidfw-dev.deb \
+            https://mirrors.aliyun.com/ubuntu-ports/pool/universe/a/android-platform-frameworks-base/android-libandroidfw-dev_14~beta1-2build3_arm64.deb
+          echo '39e74d916198d2f214fc485921c05bf0328771656a8fd8274456da968473ff17  /tmp/android-headers/androidfw-dev.deb' \
+            | sha256sum -c -
+          dpkg-deb -x /tmp/android-headers/androidfw-dev.deb /tmp/android-headers/androidfw-dev
+          cp -a /tmp/android-headers/androidfw-dev/usr/include/android/androidfw \
+            third_party/androidfw/include/
+          test -s third_party/androidfw/include/android/configuration.h
+          sed -i '/#include "androidfw\/ApkParsing.h"/a#include <cstring>' third_party/androidfw/ApkParsing.cpp
           CC=clang CXX='clang++ -stdlib=libstdc++' ./build.sh
           file build/aapt2
           ldd build/aapt2
