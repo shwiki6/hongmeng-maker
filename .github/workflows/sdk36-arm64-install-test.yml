@@ -45,3 +45,9 @@ jobs:
           test -s "$SDK_ROOT/platforms/android-36/android.jar"
       - name: Build native AAPT2
         run: bash scripts/build-native-aapt2.sh
+      - name: Verify native AAPT2
+        run: |
+          set -eux
+          export LD_LIBRARY_PATH="$(dirname "$(find /usr/lib /lib -name 'liblog.so.0*' -type f -o -name 'liblog.so.0*' -type l | head -n1)")${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+          "$GITHUB_WORKSPACE/package/aapt2" version
+          "$GITHUB_WORKSPACE/package/aapt2" dump badging "$SDK_ROOT/platforms/android-36/android.jar" >/dev/null
